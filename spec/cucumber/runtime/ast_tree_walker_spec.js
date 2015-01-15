@@ -1,8 +1,10 @@
+var domain = require('domain');
 require('../../support/spec_helper');
 
 describe("Cucumber.Runtime.AstTreeWalker", function() {
   var Cucumber = requireLib('cucumber');
   var beforeStepCollection, afterStepCollection, attachmentCollection, emptyHook;
+  var walkDomain;
   var treeWalker, features, supportCodeLibrary, listeners, supportListeners;
 
   beforeEach(function() {
@@ -10,6 +12,7 @@ describe("Cucumber.Runtime.AstTreeWalker", function() {
     supportCodeLibrary   = createSpy("Support code library");
     listeners            = [createSpy("First listener"), createSpy("Second listener")];
     supportListeners     = [createSpy("First support listener"), createSpy("Second support listener")];
+    walkDomain           = createSpy("walk domain");
     spyOnStub(listeners, 'syncForEach').andCallFake(function(cb) { listeners.forEach(cb); });
     spyOnStub(supportListeners, 'syncForEach').andCallFake(function(cb) { supportListeners.forEach(cb); });
     spyOnStub(supportCodeLibrary, 'getListeners').andReturn(supportListeners);
@@ -20,8 +23,12 @@ describe("Cucumber.Runtime.AstTreeWalker", function() {
     emptyHook            = createSpy("empty hook");
     spyOn(Cucumber.Type, 'Collection').andReturnSeveral([beforeStepCollection, afterStepCollection, attachmentCollection]);
     spyOn(Cucumber.SupportCode, "Hook").andReturn(emptyHook);
-
+    spyOn(domain, 'create').andReturn(walkDomain);
     treeWalker           = Cucumber.Runtime.AstTreeWalker(features, supportCodeLibrary, listeners);
+  });
+
+  it("creates a domain", function () {
+    expect(domain.create).toHaveBeenCalled();
   });
 
   describe("walk()", function() {
@@ -30,6 +37,17 @@ describe("Cucumber.Runtime.AstTreeWalker", function() {
     beforeEach(function() {
       callback = createSpy("Callback");
       spyOn(treeWalker, 'visitFeatures');
+    });
+
+    describe("when the walk domain can be entered", function () {
+      beforeEach(function () {
+        spyOnStub(walkDomain, 'enter');
+      });
+
+      it("enters the domain", function () {
+        treeWalker.walk(callback);
+        expect(walkDomain.enter).toHaveBeenCalled();
+      });
     });
 
     it("visits all features with a callback", function() {
@@ -48,6 +66,17 @@ describe("Cucumber.Runtime.AstTreeWalker", function() {
         featuresVisitCallback = treeWalker.visitFeatures.mostRecentCall.args[1];
         featuresResult = createSpy("result of all features");
         spyOn(treeWalker, 'didAllFeaturesSucceed').andReturn(featuresResult);
+      });
+
+      describe("when the walk domain can be exited", function () {
+        beforeEach(function () {
+          spyOnStub(walkDomain, 'exit');
+        });
+
+        it("exits the domain", function () {
+          featuresVisitCallback();
+          expect(walkDomain.exit).toHaveBeenCalled();
+        });
       });
 
       it("checks whether all features were successful", function() {
@@ -940,23 +969,51 @@ describe("Cucumber.Runtime.AstTreeWalker", function() {
   });
 
   describe("didAllFeaturesSucceed()", function() {
-    it("returns true when no failure was encountered", function() {
-      expect(treeWalker.didAllFeaturesSucceed()).toBeTruthy();
+    describe("when strict mode is off", function() {
+      it("returns true when no failure was encountered", function() {
+        expect(treeWalker.didAllFeaturesSucceed()).toBeTruthy();
+      });
+
+      it("returns false when a failed step was encountered", function() {
+        treeWalker.witnessFailedStep();
+        expect(treeWalker.didAllFeaturesSucceed()).toBeFalsy();
+      });
+
+      it("returns true when a pending step was encountered", function() {
+        treeWalker.witnessPendingStep();
+        expect(treeWalker.didAllFeaturesSucceed()).toBeTruthy();
+      });
+
+      it("returns true when an undefined step was encountered", function() {
+        treeWalker.witnessUndefinedStep();
+        expect(treeWalker.didAllFeaturesSucceed()).toBeTruthy();
+      });
     });
 
-    it("still returns true when a pending step was encountered", function() {
-      treeWalker.witnessPendingStep();
-      expect(treeWalker.didAllFeaturesSucceed()).toBeTruthy();
-    });
+    describe("when strict mode is on", function() {
+      beforeEach(function() {
+        var isStrictMode = true;
+        treeWalker = Cucumber.Runtime.AstTreeWalker(features, supportCodeLibrary, listeners, isStrictMode);
+      });
 
-    it("still returns true when a undefined step was encountered", function() {
-      treeWalker.witnessUndefinedStep();
-      expect(treeWalker.didAllFeaturesSucceed()).toBeTruthy();
-    });
+      it("returns true when no failure was encountered", function() {
+        expect(treeWalker.didAllFeaturesSucceed()).toBeTruthy();
+      });
 
-    it("returns false when a failed step was encountered", function() {
-      treeWalker.witnessFailedStep();
-      expect(treeWalker.didAllFeaturesSucceed()).toBeFalsy();
+      it("returns false when a failed step was encountered", function() {
+        treeWalker.witnessFailedStep();
+        expect(treeWalker.didAllFeaturesSucceed()).toBeFalsy();
+      });
+
+      it("returns false when a pending step was encountered", function() {
+        treeWalker.witnessPendingStep();
+        expect(treeWalker.didAllFeaturesSucceed()).toBeFalsy();
+      });
+
+      it("returns false when an undefined step was encountered", function() {
+        treeWalker.witnessUndefinedStep();
+        expect(treeWalker.didAllFeaturesSucceed()).toBeFalsy();
+      });
     });
   });
 
@@ -1195,6 +1252,12 @@ describe("Cucumber.Runtime.AstTreeWalker", function() {
       it("returns the API scenario", function() {
         expect(returnValue).toBe(apiScenario);
       });
+    });
+  });
+
+  describe("getDomain()", function() {
+    it("returns the walk domain", function() {
+      expect(treeWalker.getDomain()).toBe(walkDomain);
     });
   });
 

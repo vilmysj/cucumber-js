@@ -2,9 +2,77 @@
 
 ## [v0.4.x](https://github.com/cucumber/cucumber-js/compare/v0.4.0...master)
 
-### [master (unreleased)](https://github.com/cucumber/cucumber-js/compare/v0.4.3...master)
+### [master (unreleased)](https://github.com/cucumber/cucumber-js/compare/v0.4.7...master)
 
-**TBD**
+#### Fixes
+
+* Handle BOM, support hyphenated language codes. (close #144) (Aslak Hellesøy)
+
+### [v0.4.7](https://github.com/cucumber/cucumber-js/compare/v0.4.6...v0.4.7)
+
+#### Documentation, internals and tests
+
+* Do not dispose of step domains (Julien Biezemans)
+* Refactor and add debug code (Julien Biezemans)
+* Create a single domain per run (Julien Biezemans)
+* Add missing AstTreeWalker specs (Julien Biezemans)
+* Indent (Julien Biezemans)
+* Spec domain enter/exit in AstTreeWalker (Julien Biezemans)
+
+### [v0.4.6](https://github.com/cucumber/cucumber-js/compare/v0.4.5...v0.4.6)
+
+#### New features
+
+* Add --no-snippets flag to CLI (close #207) (Krispin Schulz)
+* Add strict mode (close #211) (Elwyn)
+* Add strict mode to volatile configuration (close #258) (Jan-Eric Duden)
+
+#### Fixes
+
+* Fix code loader on windows (close #226) (Gary Taylor)
+
+#### Documentation, internals and tests
+
+* Connect to Rubygems through SSL (Julien Biezemans)
+* Use Node domain's enter/exit in stepdefs (Julien Biezemans)
+* Do not display snippets in build (Julien Biezemans)
+* Asynchronously dispose of step domains (Julien Biezemans)
+* Change order of tests in build (Julien Biezemans)
+* Fix tests to run on Windows (close #216) (kostya.misura)
+* Fix registerHandler() example in README (Julien Biezemans)
+* Fix typo in variable name (Julien Biezemans)
+* Fix World property assignment in README example (Julian)
+* Unix EOLs (Julien Biezemans)
+* Ignore .ruby-* (Julien Biezemans)
+
+### [v0.4.5](https://github.com/cucumber/cucumber-js/compare/v0.4.4...v0.4.5)
+
+#### Documentation, internals and tests
+
+* Fix issue with npm upgrade on node.js v0.8 (Simon Dean)
+* Use Node domain to handle asynchronous exceptions (Julien Biezemans)
+
+### [v0.4.4](https://github.com/cucumber/cucumber-js/compare/v0.4.3...v0.4.4)
+
+#### Fixes
+
+* Allow >1 parameter in string step definitions (Craig Morris)
+* Don't skip scenario outlines (close #245) (Julien Biezemans)
+
+#### Documentation, internals and tests
+
+* Bump nopt (Julien Biezemans)
+* Bump coffee-script (Julien Biezemans)
+* Bump pogo (Julien Biezemans)
+* Bump underscore (Julien Biezemans)
+* Bump rimraf (Julien Biezemans)
+* Bump jasmine-node (Julien Biezemans)
+* Bump connect (Julien Biezemans)
+* Rewrite bundling system (close #186) (Julien Biezemans)
+* Rename release script (Julien Biezemans)
+* Upgrade NPM on Travis (Julien Biezemans)
+* Drop Node 0.6 support (Julien Biezemans)
+* Drop Node 0.6 support (manifest) (Julien Biezemans)
 
 ### [v0.4.3](https://github.com/cucumber/cucumber-js/compare/v0.4.2...v0.4.3)
 
