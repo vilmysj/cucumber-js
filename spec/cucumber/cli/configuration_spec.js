@@ -16,7 +16,7 @@ describe("Cucumber.Cli.Configuration", function () {
     argumentParser      = createSpyWithStubs("argument parser", {parse: null});
     spyOn(Cucumber.Cli, 'ArgumentParser').andReturn(argumentParser);
     configuration       = Cucumber.Cli.Configuration(argv);
-    context['configuration'] = configuration;
+    context.configuration = configuration;
   });
 
   itBehavesLikeAllCucumberConfigurations(context);
@@ -140,8 +140,6 @@ describe("Cucumber.Cli.Configuration", function () {
     });
 
     describe("when the formatter name is unknown", function () {
-      var formatter;
-
       beforeEach(function () {
         argumentParser.getFormat.andReturn("blah");
       });
@@ -206,7 +204,7 @@ describe("Cucumber.Cli.Configuration", function () {
   });
 
   describe("getAstFilter()", function () {
-    var astFilter, tagFilterRules;
+    var astFilter, tagFilterRules, scenarioByLineFilterRules;
 
     beforeEach(function () {
       astFilter      = createSpyWithStubs("AST filter");
@@ -357,6 +355,23 @@ describe("Cucumber.Cli.Configuration", function () {
       var shouldSnippetsBeShown = createSpy("show step definitions?");
       argumentParser.shouldSnippetsBeShown.andReturn(shouldSnippetsBeShown);
       expect(configuration.shouldSnippetsBeShown()).toBe(shouldSnippetsBeShown);
+    });
+  });
+
+  describe("shouldFilterStackTraces()", function () {
+    beforeEach(function () {
+      spyOnStub(argumentParser, 'shouldFilterStackTraces');
+    });
+
+    it("asks the argument parser whether the stack traces are filtered", function () {
+      configuration.shouldFilterStackTraces();
+      expect(argumentParser.shouldFilterStackTraces).toHaveBeenCalled();
+    });
+
+    it("tells whether the stack traces are filtered or not", function () {
+      var shouldStackTracesBeFiltered = createSpy("filter stack traces?");
+      argumentParser.shouldFilterStackTraces.andReturn(shouldStackTracesBeFiltered);
+      expect(configuration.shouldFilterStackTraces()).toBe(shouldStackTracesBeFiltered);
     });
   });
 
